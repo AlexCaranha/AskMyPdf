@@ -9,6 +9,9 @@ from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore import InMemoryDocstore
+from gtts import gTTS
+from playsound import playsound
+import tempfile
 
 # Local LLM configuration (via LM Studio)
 LLM_LOCAL_ENDPOINT = "http://127.0.0.1:1234/v1"  # adjust if necessary
@@ -93,8 +96,18 @@ def build_qa_chain(vectorstore):
     return qa
 
 
+def speak_text(text, lang="en"):
+    """Convert text to speech and play it using gTTS and playsound."""
+    tts = gTTS(text=text, lang=lang)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+        temp_mp3 = fp.name
+    tts.save(temp_mp3)
+    playsound(temp_mp3)
+    os.remove(temp_mp3)
+
+
 if __name__ == "__main__":
-    pdf_path = "The-Skalunda-Giant.pdf"
+    pdf_path = "The-Skalund a-Giant.pdf"
 
     print("[INFO] Loading PDF...")
     docs = load_pdf(pdf_path)
@@ -116,3 +129,4 @@ if __name__ == "__main__":
 
         answer = qa_chain.run(question)
         print(f"Answer: {answer}\n")
+        speak_text(answer, lang="en")
