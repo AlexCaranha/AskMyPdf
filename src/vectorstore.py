@@ -4,10 +4,11 @@ import numpy as np
 from langchain.docstore import InMemoryDocstore
 from langchain.schema import Document
 from langchain.vectorstores import FAISS
+from langchain.embeddings.base import Embeddings
 from src.embeddings import get_embedding
 
 
-def create_vectorstore(chunks, llm_local_endpoint: str):
+def create_vectorstore(chunks, llm_local_endpoint):
     valid_texts = [
         doc.page_content
         for doc in chunks

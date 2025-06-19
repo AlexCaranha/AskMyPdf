@@ -1,6 +1,5 @@
-
 from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 
 def build_qa_chain(vectorstore, llm_model_name: str, llm_local_endpoint: str):
