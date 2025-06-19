@@ -4,7 +4,7 @@ from src.qa_chain import build_qa_chain
 from src.tts import speak_text
 from src.sst import get_audio_input
 from src.vectorstore import create_vectorstore
-
+from rich import print
 
 
 # Local LLM configuration (via LM Studio)
@@ -18,7 +18,7 @@ os.environ["OPENAI_API_KEY"] = "lmstudio"
 
 def text_or_audio_input():
     while(True):
-        user_input = input("Ask something (or press Enter for audio): ").strip()
+        user_input = input("\033[94mAsk something (or press Enter for audio): \033[0m").strip()  # Blue prompt
 
         if not user_input:
             # Try audio input
@@ -31,7 +31,7 @@ def text_or_audio_input():
 
 
 def text_and_audio_output(text):
-    print(f"Answer: {text}\n")
+    print(f"[green]Answer: {text}[/green]\n")  # Green answer
     speak_text(text)
 
 
