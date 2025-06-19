@@ -1,9 +1,10 @@
 import os
-
 from src.pdf_loader import load_pdf, split_documents
 from src.qa_chain import build_qa_chain
 from src.tts import speak_text
+from src.sst import get_audio_input
 from src.vectorstore import create_vectorstore
+
 
 
 # Local LLM configuration (via LM Studio)
@@ -13,6 +14,26 @@ pdf_path = "data\The-Skalunda-Giant.pdf"
 
 # Dummy API key (LM Studio ignores)
 os.environ["OPENAI_API_KEY"] = "lmstudio"
+
+
+def text_or_audio_input():
+    while(True):
+        user_input = input("Ask something (or press Enter for audio): ").strip()
+
+        if not user_input:
+            # Try audio input
+            user_input = get_audio_input()
+
+        if user_input is not None:
+            break
+
+    return user_input
+
+
+def text_and_audio_output(text):
+    print(f"Answer: {text}\n")
+    speak_text(text)
+
 
 if __name__ == "__main__":
     print("[INFO] Loading PDF...")
@@ -27,12 +48,11 @@ if __name__ == "__main__":
     print("[INFO] Initializing chatbot...")
     qa_chain = build_qa_chain(vectorstore, LLM_MODEL_NAME, LLM_LOCAL_ENDPOINT)
 
-    print("\nType your question (or 'exit' to exit):")
+    print("Type your question, or press Enter to use your microphone (say 'exit' or 'quit' to leave):")
     while True:
-        question = input("Ask something: ")
-        if question.lower() in ["exit", "quit"]:
+        user_input = text_or_audio_input()
+        if user_input.lower() in ["exit", "quit"]:
             break
 
-        answer = qa_chain.run(question)
-        print(f"Answer: {answer}\n")
-        speak_text(answer, lang="en")
+        answer = qa_chain.run(user_input)
+        text_and_audio_output(answer)

@@ -15,13 +15,13 @@ def create_vectorstore(chunks, llm_local_endpoint: str):
         and isinstance(doc.page_content, str)
         and doc.page_content.strip()
     ]
-    print(f"[DEBUG] Number of valid texts: {len(valid_texts)}")
+    # print(f"[DEBUG] Number of valid texts: {len(valid_texts)}")
     if not valid_texts:
         raise ValueError("No valid text found for indexing.")
 
     # Manually generate embeddings
     embeddings = [get_embedding(text, llm_local_endpoint) for text in valid_texts]
-    print(f"[DEBUG] Embedding shape: {len(embeddings[0])}")
+    # print(f"[DEBUG] Embedding shape: {len(embeddings[0])}")
 
     # Manually create FAISS index
     embedding_dim = len(embeddings[0])
