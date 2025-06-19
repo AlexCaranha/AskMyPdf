@@ -1,22 +1,20 @@
 import os
+import faiss
 import requests
 import numpy as np
 from langchain.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-from langchain_community.vectorstores.faiss import FAISS as FAISS_COMM
 from langchain.docstore import InMemoryDocstore
-import faiss
 
-# Configuração do LLM local (via LM Studio)
-LLM_LOCAL_ENDPOINT = "http://127.0.0.1:1234/v1"  # ajuste se necessário
-LLM_MODEL_NAME = "fastllama-3.2-1b-instruct"  # ou outro nome visível no LM Studio
+# Local LLM configuration (via LM Studio)
+LLM_LOCAL_ENDPOINT = "http://127.0.0.1:1234/v1"  # adjust if necessary
+LLM_MODEL_NAME = "fastllama-3.2-1b-instruct"  # or another name visible in LM Studio
 
-# Dummy API key (LM Studio ignora)
+# Dummy API key (LM Studio ignores)
 os.environ["OPENAI_API_KEY"] = "lmstudio"
 
 
@@ -32,7 +30,7 @@ def split_documents(documents):
 
 
 def get_embedding(text):
-    url = "http://127.0.0.1:1234/v1/embeddings"
+    url = f"{LLM_LOCAL_ENDPOINT}/embeddings"
     headers = {"Content-Type": "application/json"}
     data = {"model": "text-embedding-nomic-embed-text-v1.5", "input": text}
     response = requests.post(url, headers=headers, json=data)
@@ -52,27 +50,27 @@ def create_vectorstore(chunks):
     if not valid_texts:
         raise ValueError("No valid text found for indexing.")
 
-    # Gera embeddings manualmente
+    # Manually generate embeddings
     embeddings = [get_embedding(text) for text in valid_texts]
     print(f"[DEBUG] Embedding shape: {len(embeddings[0])}")
 
-    # Cria FAISS index manualmente
+    # Manually create FAISS index
     embedding_dim = len(embeddings[0])
     index = faiss.IndexFlatL2(embedding_dim)
     index.add(np.array(embeddings).astype("float32"))
 
-    # Cria os objetos Document
+    # Create Document objects
     docs = [Document(page_content=text) for text in valid_texts]
 
-    # Cria docstore e index_to_docstore_id
+    # Create docstore and index_to_docstore_id
     docstore = InMemoryDocstore({str(i): doc for i, doc in enumerate(docs)})
     index_to_docstore_id = {i: str(i) for i in range(len(docs))}
 
-    # Função dummy de embedding (não será usada, pois já temos os embeddings)
+    # Dummy embedding function (will not be used, since we already have the embeddings)
     def dummy_embedding(x):
         return [0.0] * embedding_dim
 
-    # Cria o FAISS vectorstore do LangChain
+    # Create the LangChain FAISS vectorstore
     faiss_index = FAISS(
         dummy_embedding,  # embedding_function
         index,
