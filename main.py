@@ -22,21 +22,24 @@ os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 SYSTEM_PROMPT = (
     "Respond in a polite, concise, direct, and brief manner. "
     "Provide only the information needed to answer the user's question, "
-    "avoiding lengthy explanations or unnecessary details."
+    "avoiding lengthy explanations or unnecessary details. "
+    "After your answer, include a brief explanation to justify or clarify your response."
 )
 
 
 def text_or_audio_input():
     while True:
-        user_input = input(
-            "\033[94mAsk something (or press Enter for audio): \033[0m"
-        ).strip()  # Blue prompt
+        user_input = (
+            input("\033[94mAsk something (or press Enter for audio): \033[0m")
+            .strip()
+            .lower()
+        )  # Blue prompt
 
-        if not user_input:
-            user_input = get_audio_input(color="yellow")
+        if user_input == "exit" or user_input == "quit":
+            return
 
         # Detect if input is not English and translate
-        if user_input is not None and user_input.strip():
+        if user_input and user_input.strip():
             try:
                 lang = detect(user_input)
             except Exception as e:
@@ -46,7 +49,10 @@ def text_or_audio_input():
             if lang != "en":
                 translated = translate_to_english(user_input)
                 text_and_audio_output(category="Input", text=translated, color="yellow")
-                user_input = None
+                continue
+
+        if not user_input:
+            user_input = get_audio_input(color="yellow")
 
         if user_input is not None:
             break
@@ -59,7 +65,7 @@ def text_and_audio_output(category: str, text: str, color: str = "green"):
     speak_text(text)
 
 
-if __name__ == "__main__":
+def run():
     print(f"[INFO] Loading PDF: {pdf_path}")
     docs = load_pdf(pdf_path)
 
@@ -77,10 +83,15 @@ if __name__ == "__main__":
     )
     while True:
         user_input = text_or_audio_input()
-        if user_input.lower() in ["exit", "quit"]:
+        if user_input == "exit" or user_input == "quit":
+            print("AskMyPdf - Exiting...")
             break
 
         # Inclui o prompt do sistema antes da pergunta do usuário
         full_prompt = f"{SYSTEM_PROMPT}\n\n{user_input}"
         answer = qa_chain.invoke(full_prompt)
         text_and_audio_output(category="Answer", text=answer["result"], color="green")
+
+
+if __name__ == "__main__":
+    run()

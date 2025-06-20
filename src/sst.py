@@ -18,16 +18,14 @@ def get_audio_input(color: str):
             text = recognizer.recognize_google(audio, language="en")
             print(f"[{color}][bold]AUDIO INPUT[/bold]: {text}[/{color}]\n")
         
+            if text.lower() == "exit" or text.lower() == "quit":
+                return None
+
             is_correct: str = input("\033[94mIs the input provided correct? (y-Yes/n-no): \033[0m").strip()
             status: bool = is_correct == '' or is_correct.lower() in ["y", "yes", "true", "1"]
 
-            if not status:
-                continue
-
-            if text.lower() in ["exit", "quit"]:
-                return None
-
-            return text
+            if status:
+                return text
 
         except sr.UnknownValueError as e:
             print("[INFO] Could not understand audio. Please type your question.")
