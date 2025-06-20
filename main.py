@@ -36,7 +36,7 @@ def text_or_audio_input():
         )  # Blue prompt
 
         if user_input == "exit" or user_input == "quit":
-            return
+            return "exit"
 
         # Detect if input is not English and translate
         if user_input and user_input.strip():
@@ -87,7 +87,6 @@ def run():
             print("AskMyPdf - Exiting...")
             break
 
-        # Inclui o prompt do sistema antes da pergunta do usuário
         full_prompt = f"{SYSTEM_PROMPT}\n\n{user_input}"
         answer = qa_chain.invoke(full_prompt)
         text_and_audio_output(category="Answer", text=answer["result"], color="green")
