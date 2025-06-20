@@ -11,13 +11,19 @@ from rich import print
 from langdetect import detect
 
 
-load_dotenv()  # Carrega as variáveis do .env
+load_dotenv()
 
 
 LLM_LOCAL_ENDPOINT: str = os.getenv("LLM_LOCAL_ENDPOINT")
 LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME")
 pdf_path: str = os.getenv("PDF_PATH")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+SYSTEM_PROMPT = (
+    "Respond in a polite, concise, direct, and brief manner. "
+    "Provide only the information needed to answer the user's question, "
+    "avoiding lengthy explanations or unnecessary details."
+)
 
 
 def text_or_audio_input():
@@ -27,31 +33,29 @@ def text_or_audio_input():
         ).strip()  # Blue prompt
 
         if not user_input:
-            # Try audio input
-            user_input = get_audio_input()
+            user_input = get_audio_input(color="yellow")
+
+        # Detect if input is not English and translate
+        if user_input is not None and user_input.strip():
+            try:
+                lang = detect(user_input)
+            except Exception as e:
+                print(f"[red]Language detection error: {e}[/red]")
+                lang = "en"
+
+            if lang != "en":
+                translated = translate_to_english(user_input)
+                text_and_audio_output(category="Input", text=translated, color="yellow")
+                user_input = None
 
         if user_input is not None:
             break
 
-    # Detect if input is not English and translate
-    if user_input.strip():
-        try:
-            lang = detect(user_input)
-        except Exception as e:
-            print(f"[red]Language detection error: {e}[/red]")
-            lang = "en"
-
-        if lang != "en":
-            translated = translate_to_english(user_input)
-            print(f"[blue]Detected language:[/blue] {lang}")
-            print(f"[yellow]Translated to English:[/yellow] [bold]{translated}[/bold]")
-            user_input = translated
-
     return user_input
 
 
-def text_and_audio_output(text):
-    print(f"[green]Answer: {text}[/green]\n")  # Green answer
+def text_and_audio_output(category: str, text: str, color: str = "green"):
+    print(f"[{color}][bold]{category}[/bold]: {text}[/{color}]\n")
     speak_text(text)
 
 
@@ -76,5 +80,7 @@ if __name__ == "__main__":
         if user_input.lower() in ["exit", "quit"]:
             break
 
-        answer = qa_chain.invoke(user_input)  # Use invoke no lugar de run
-        text_and_audio_output(answer["result"])
+        # Inclui o prompt do sistema antes da pergunta do usuário
+        full_prompt = f"{SYSTEM_PROMPT}\n\n{user_input}"
+        answer = qa_chain.invoke(full_prompt)
+        text_and_audio_output(category="Answer", text=answer["result"], color="green")

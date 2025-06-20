@@ -8,6 +8,18 @@ from langchain.embeddings.base import Embeddings
 from src.embeddings import get_embedding
 
 
+class CustomEmbeddings(Embeddings):
+    def __init__(self, llm_local_endpoint, embedding_dim):
+        self.llm_local_endpoint = llm_local_endpoint
+        self.embedding_dim = embedding_dim
+
+    def embed_documents(self, texts):
+        return [get_embedding(text, self.llm_local_endpoint) for text in texts]
+
+    def embed_query(self, text):
+        return get_embedding(text, self.llm_local_endpoint)
+
+
 def create_vectorstore(chunks, llm_local_endpoint):
     valid_texts = [
         doc.page_content
@@ -16,13 +28,11 @@ def create_vectorstore(chunks, llm_local_endpoint):
         and isinstance(doc.page_content, str)
         and doc.page_content.strip()
     ]
-    # print(f"[DEBUG] Number of valid texts: {len(valid_texts)}")
     if not valid_texts:
         raise ValueError("No valid text found for indexing.")
 
     # Manually generate embeddings
     embeddings = [get_embedding(text, llm_local_endpoint) for text in valid_texts]
-    # print(f"[DEBUG] Embedding shape: {len(embeddings[0])}")
 
     # Manually create FAISS index
     embedding_dim = len(embeddings[0])
@@ -36,13 +46,12 @@ def create_vectorstore(chunks, llm_local_endpoint):
     docstore = InMemoryDocstore({str(i): doc for i, doc in enumerate(docs)})
     index_to_docstore_id = {i: str(i) for i in range(len(docs))}
 
-    # Dummy embedding function (will not be used, since we already have the embeddings)
-    def dummy_embedding(x):
-        return [0.0] * embedding_dim
+    # Use a proper Embeddings object
+    embedding_obj = CustomEmbeddings(llm_local_endpoint, embedding_dim)
 
     # Create the LangChain FAISS vectorstore
     faiss_index = FAISS(
-        dummy_embedding,  # embedding_function
+        embedding_obj,  # embedding_function as Embeddings object
         index,
         docstore,
         index_to_docstore_id,
