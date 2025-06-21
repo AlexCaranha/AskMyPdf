@@ -6,9 +6,9 @@ def build_qa_chain(vectorstore, llm_model_name: str, llm_local_endpoint: str):
     retriever = vectorstore.as_retriever()
     llm = ChatOpenAI(
         temperature=0,
-        model_name=llm_model_name,
-        openai_api_key="lmstudio",
-        openai_api_base=llm_local_endpoint,
+        model=llm_model_name,           # Use 'model' em vez de 'model_name'
+        base_url=llm_local_endpoint,    # Use 'base_url' em vez de 'openai_api_base'
     )
     qa = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
     return qa
+ 
