@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from src.pdf_loader import load_pdf, split_documents
 from src.qa_chain import build_qa_chain
 
-from src.stt import get_audio_input
 from src.translate import translate_to_english
 from src.vectorstore import create_vectorstore
 
@@ -54,13 +53,6 @@ def text_or_audio_input():
                 translated = translate_to_english(user_input)
                 print_rich(category=Category.TRANSLATOR, text=translated)
                 continue
-
-        if user_input == "mic":
-            user_input = get_audio_input()
-            print_rich(category=Category.USER, text=user_input)
-
-            if user_input == "exit" or user_input == "quit":
-                return "exit"
 
         if user_input is not None:
             break
