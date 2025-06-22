@@ -1,27 +1,37 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from langchain_core.runnables import RunnableLambda
-from typing_extensions import Annotated
 from langserve import add_routes
 from src.pdf_loader import load_pdf, split_documents
 from src.vectorstore import create_vectorstore
 from src.qa_chain import build_qa_chain
 import os
 import tempfile
+from dotenv import load_dotenv
+
+LLM_LOCAL_ENDPOINT: str = os.getenv("LLM_LOCAL_ENDPOINT")
+LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME")
+pdf_path: str = os.getenv("PDF_PATH")
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+SYSTEM_PROMPT = (
+    "Respond in a polite, concise, direct, and brief manner. "
+    "Provide only the information needed to answer the user's question, "
+    "avoiding lengthy explanations or unnecessary details. "
+    "After your answer, include a brief explanation to justify or clarify your response."
+)
+
+
+load_dotenv()
 
 
 app = FastAPI()
-
 
 # Estado global para armazenar o QA chain por sessão (simples para exemplo)
 qa_chain = None
 
 
 @app.post("/upload_pdf")
-async def upload_pdf(
-    file: UploadFile = File(...),
-    llm_model_name: str = Form(...),
-    llm_local_endpoint: str = Form(...),
-):
+async def upload_pdf(file: UploadFile = File(...)):
     global qa_chain
     # Salva PDF temporariamente
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
@@ -30,8 +40,8 @@ async def upload_pdf(
 
     docs = load_pdf(tmp_path)
     chunks = split_documents(docs)
-    vectorstore = create_vectorstore(chunks, llm_local_endpoint)
-    qa_chain = build_qa_chain(vectorstore, llm_model_name, llm_local_endpoint)
+    vectorstore = create_vectorstore(chunks, LLM_LOCAL_ENDPOINT)
+    qa_chain = build_qa_chain(vectorstore, LLM_MODEL_NAME, LLM_LOCAL_ENDPOINT)
     os.remove(tmp_path)
     return {"message": "PDF uploaded and vectorstore created."}
 
@@ -41,7 +51,9 @@ def ask_question(question: str) -> str:
     global qa_chain
     if qa_chain is None:
         return "PDF not uploaded yet."
-    answer = qa_chain.invoke(question)
+    
+    full_prompt = f"{SYSTEM_PROMPT}\n\n{question}"
+    answer = qa_chain.invoke(full_prompt)
     return answer["result"]
 
 
