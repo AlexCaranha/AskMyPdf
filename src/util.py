@@ -4,7 +4,7 @@ from enum import Enum
 
 
 class Category(Enum):
-    NONE = 1
+    ASKMYPDF = 1
     SYSTEM = 2
     USER = 3
     TRANSLATOR = 3
@@ -15,10 +15,10 @@ def print_rich(category: Category, text: str):
 
     color = get_category_color(category)
 
-    if category is None:
-        print(f"[{color}]{text}[/{color}]\n")
+    if category == Category.ASKMYPDF:
+        print(f"[{color}][bold]AskMyPDF[/bold]: {text}[/{color}]\n")
     else:
-        print(f"[{color}][bold]{category}[/bold]: {text}[/{color}]\n")
+        print(f"[{color}][bold]{category.name}[/bold]: {text}[/{color}]\n")
 
     speak = category == Category.CHATBOT or category == Category.USER
     if speak:
@@ -31,6 +31,6 @@ def get_category_color(category: Category) -> str:
         Category.TRANSLATOR: "yellow",
         Category.CHATBOT: "green",
         Category.USER: "blue",
-        Category.NONE: "white",
+        Category.ASKMYPDF: "green",
     }
     return category_colors.get(category, "white")

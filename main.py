@@ -70,21 +70,21 @@ def text_or_audio_input():
 
 def run():
 
-    print_rich(category=Category.NONE, text=f"Loading PDF: {pdf_path}")
+    print_rich(category=Category.ASKMYPDF, text=f"Loading PDF: {pdf_path}")
     docs = load_pdf(pdf_path)
 
-    print_rich(category=Category.NONE, text="Splitting into chunks")
+    print_rich(category=Category.ASKMYPDF, text="Splitting into chunks")
     chunks = split_documents(docs)
 
-    print_rich(category=Category.NONE, text="Creating vector store")
+    print_rich(category=Category.ASKMYPDF, text="Creating vector store")
     vectorstore = create_vectorstore(chunks, LLM_LOCAL_ENDPOINT)
 
-    print_rich(category=Category.NONE, text="Initializing chatbot")
+    print_rich(category=Category.ASKMYPDF, text="Initializing chatbot")
     qa_chain = build_qa_chain(vectorstore, LLM_MODEL_NAME, LLM_LOCAL_ENDPOINT)
 
     print_rich(
         category=Category.SYSTEM,
-        text="Type your question, or press Enter to use your microphone (say 'exit' or 'quit' to leave)"
+        text="Type your question, or press Enter to use your microphone (say 'exit' or 'quit' to leave)",
     )
     while True:
         user_input = text_or_audio_input()
