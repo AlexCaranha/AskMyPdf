@@ -1,19 +1,30 @@
 import string
 import os
 
-from langchain.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-LLM_LOCAL_ENDPOINT: str = os.getenv("LLM_LOCAL_ENDPOINT")
-LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME")
-pdf_path: str = os.getenv("PDF_PATH")
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+def load_pdfs(pdf_dir: str):
+    if not pdf_dir or not os.path.isdir(pdf_dir):
+        raise FileNotFoundError(
+            f"Invalid PDF_PATH: '{pdf_dir}'. Provide a valid directory containing PDF files."
+        )
 
+    pdf_files = [
+        os.path.join(pdf_dir, f)
+        for f in os.listdir(pdf_dir)
+        if f.lower().endswith(".pdf")
+    ]
+    if not pdf_files:
+        raise FileNotFoundError(f"No PDF files found in directory '{pdf_dir}'.")
 
-def load_pdf(file_path):
-    loader = PyMuPDFLoader(file_path)
-    documents = loader.load()
+    documents = []
+    for pdf_file in pdf_files:
+        print(f"Reading PDF file: {pdf_file}")
+        loader = PyMuPDFLoader(pdf_file)
+        documents.extend(loader.load())
+
     return documents
 
 

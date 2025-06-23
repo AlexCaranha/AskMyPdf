@@ -1,5 +1,4 @@
 from rich import print
-from src.tts import speak_text
 from enum import Enum
 
 
@@ -19,10 +18,6 @@ def print_rich(category: Category, text: str):
         print(f"[{color}][bold]AskMyPDF[/bold]: {text}[/{color}]\n")
     else:
         print(f"[{color}][bold]{category.name}[/bold]: {text}[/{color}]\n")
-
-    speak = category == Category.CHATBOT or category == Category.USER
-    if speak:
-        speak_text(text)
 
 
 def get_category_color(category: Category) -> str:

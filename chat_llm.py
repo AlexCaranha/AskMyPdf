@@ -2,7 +2,7 @@ import os
 from langdetect import detect
 
 from dotenv import load_dotenv
-from src.pdf_loader import load_pdf, split_documents
+from src.pdf_loader import load_pdfs, split_documents
 from src.qa_chain import build_qa_chain
 
 from src.translate import translate_to_english
@@ -49,7 +49,7 @@ def text_or_audio_input():
 
 def run():
     print_rich(category=Category.ASKMYPDF, text=f"Loading PDF: {pdf_path}")
-    docs = load_pdf(pdf_path)
+    docs = load_pdfs(pdf_path)
 
     print_rich(category=Category.ASKMYPDF, text="Splitting into chunks")
     chunks = split_documents(docs)
