@@ -4,12 +4,16 @@ from langchain_core.output_parsers import StrOutputParser
 
 SYSTEM_PROMPT = "Answer briefly and directly. Only provide essential information. Add a short justification after your answer."
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", SYSTEM_PROMPT),
-    MessagesPlaceholder(variable_name="messages"),
-])
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        MessagesPlaceholder(variable_name="messages"),
+    ]
+)
+
 
 def build_qa_chain(vector_store, llm_model_name, llm_local_endpoint):
+    print(f"llm_model: {llm_model_name}")
     llm_model = ChatOpenAI(
         temperature=0,
         model=llm_model_name,

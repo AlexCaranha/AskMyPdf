@@ -6,6 +6,7 @@ LLM_MODEL_EMBEDDING_NAME: str = os.getenv("LLM_MODEL_EMBEDDING_NAME")
 
 
 def get_embedding(text, llm_local_endpoint: str):
+    print(f"llm model for embeddings: {LLM_MODEL_EMBEDDING_NAME}")
     url = f"{llm_local_endpoint}/embeddings"
     headers = {"Content-Type": "application/json"}
     data = {"model": LLM_MODEL_EMBEDDING_NAME, "input": text}
