@@ -11,7 +11,7 @@ from src.qa_chain import build_qa_chain
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 LLM_LOCAL_ENDPOINT: str = os.getenv("LLM_LOCAL_ENDPOINT")
 LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME")
-PDF_PATH = "data/"  # Default path for PDF files
+PDF_PATH = "pdfs/"  # Default path for PDF files
 
 
 docs = load_pdfs(PDF_PATH)
