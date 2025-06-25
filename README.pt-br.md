@@ -76,12 +76,5 @@ Este projeto está licenciado sob a licença MIT.
 
 ---
 
-## 📫 Contato
-
-- [Seu LinkedIn](https://www.linkedin.com/in/seuperfil)
-- [Seu Email](mailto:seu@email.com)
-
----
-
 **AskMyPdf** — Desbloqueie o conhecimento dos seus documentos com IA.
 
